@@ -58,7 +58,8 @@ class Run(object):
         
     def update_display_step(self):
         if not hasattr(self, 'imgplot'):
-            self.imgplot = self.ax.imshow(self.env.render(mode='rgb_array'), interpolation='none', cmap='viridis')
+            self.imgplot = self.ax.imshow(
+                self.env.render(mode='rgb_array'), interpolation='none', cmap='viridis', vmin=0, vmax=10)
         else:
             self.imgplot.set_data(self.env.render(mode='rgb_array'))
     

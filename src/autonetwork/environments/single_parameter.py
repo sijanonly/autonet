@@ -87,7 +87,7 @@ class TwoParaEnv(Environment):
     
     def observe_reward(self, state, prev_state, action):
         if state == prev_state:
-            return -5
+            return 0
         return self.R[state]
         
     def is_done(self, state):
@@ -98,7 +98,7 @@ class TwoParaEnv(Environment):
         s_prev = self.s
         self.s = self.update_state(self.s, action)
         reward = self.observe_reward(self.s, s_prev, action)
-        print('current step reward', reward)
+#         print('current step rewards', reward)
         done = self.is_done(self.s)
         return (self._convert_state(self.s), reward, done, '')
     
@@ -106,11 +106,13 @@ class TwoParaEnv(Environment):
         if close:
             return
         final = np.argmax(self.R)
+        max_value = np.max(self.R)
+        R = self.R.copy()
         if mode == 'rgb_array':
             maze = np.zeros((9, 9))
 #             print('current S is', self.s)
-#             maze = np.reshape(self.R, (-1, 9))
-            maze[np.unravel_index(self.s, self.shape)] = -100.0
-            maze[np.unravel_index(final, self.shape)] = 200.0
+            maze = np.reshape(R, (-1, 9))
+            maze[np.unravel_index(self.s, self.shape)] = max_value + 0.2
+#             maze[np.unravel_index(final, self.shape)] = 200.0
             img = np.array(maze, copy=True)
             return img
