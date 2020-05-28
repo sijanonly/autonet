@@ -58,8 +58,9 @@ class Run(object):
         
     def update_display_step(self):
         if not hasattr(self, 'imgplot'):
+            max_val = np.max(self.env.R)
             self.imgplot = self.ax.imshow(
-                self.env.render(mode='rgb_array'), interpolation='none', cmap='viridis', vmin=0, vmax=10)
+                self.env.render(mode='rgb_array'), cmap='Reds', interpolation='nearest', vmin=1, vmax=max_val + 10)
         else:
             self.imgplot.set_data(self.env.render(mode='rgb_array'))
     

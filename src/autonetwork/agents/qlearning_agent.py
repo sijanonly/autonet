@@ -55,13 +55,10 @@ class QLearningAgent(Agent):
 #         data_dict = {i : self.q_table[:,i] for i in np.arange(len(self.q_table))}
 #         df = pd.DataFrame(data_dict)
 #         print(df)
-        print('current q table', self.q_table)
         img = np.array(self.q_table, copy=True)
         if not hasattr(self, 'imgplot'):
-            print('i am called first')
-            self.imgplot = self.ax.imshow(img, cmap='Reds', interpolation='nearest',  vmin=1, vmax=30)
+            self.imgplot = self.ax.imshow(img, cmap='Reds', interpolation='nearest',  vmin=0, vmax=100)
         else:
-            print('i am called second')
             self.imgplot.set_data(img)
     
         self.fig.canvas.draw()
@@ -133,8 +130,8 @@ class QLearningAgent(Agent):
         self.q_table[state_xy[0]][state_xy[1]] = self.Q[(state1Str, action1)]
         self.display_q_table()
         
-        if done:
-            self._init_q_table()
+#         if done:
+#             self._init_q_table()
         
         return self.Q
         
