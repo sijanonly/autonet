@@ -28,3 +28,5 @@ Submissions:
    
    #### observations:
       - with continous reward, convergence is faster
+
+      ![Agent](images/agent.gif)
