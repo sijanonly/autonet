@@ -123,6 +123,7 @@ class Run(object):
                 self.update_display_episode()
             
             # once episode is completed,  # Reduce epsilon (because we need less and less exploration)
+            # also can use counter like : 10, 20, and update the episodes
             exploration.update_exploration(episode_number + 1)
         
         # if not interactive display, show graph at the end
