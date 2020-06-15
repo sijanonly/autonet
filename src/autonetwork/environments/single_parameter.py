@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-
+from gym.envs.toy_text import discrete
 
 class Environment(object):
     def reset(self):
@@ -20,7 +20,7 @@ class ActionSpace(object):
     def sample(self):
         return np.random.randint(0, self.n)
     
-class TwoParaEnv(Environment):
+class TwoParaEnv(discrete.DiscreteEnv):
     
     def __init__(self, R):
         self.shape = (9, 9)

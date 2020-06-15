@@ -1,6 +1,6 @@
 import numpy as np
 import sys
-
+import torch
 from matplotlib import pyplot as plt
 from matplotlib import pylab
 import matplotlib.gridspec as gridspec
@@ -93,7 +93,7 @@ class Run(object):
             while not done:
                 
                 t += 1 # increase step counter - for display
-                
+#                 print('current state', state)
                 # choose action from state using policy derived from Q
 #                 print('current epsilon', exploration.epsilon)
                 action = self.agent.act(state, exploration.epsilon)
@@ -101,6 +101,7 @@ class Run(object):
                 # take action, observe reward and next state
                 next_state, reward, done, _ = self.env.step(action)
                 # agent learn (Q-Learning update)
+#                 print('next state', next_state)
                 self.agent.learn(state, action, reward, next_state, done)
                 
                 # state <- next state
@@ -125,6 +126,89 @@ class Run(object):
             # once episode is completed,  # Reduce epsilon (because we need less and less exploration)
             # also can use counter like : 10, 20, and update the episodes
             exploration.update_exploration(episode_number + 1)
+        
+        # if not interactive display, show graph at the end
+        if not interactive:
+            self.fig.clf()
+            stats = plotting.EpisodeStats(
+                episode_lengths=self.episode_length,
+                episode_rewards=self.episode_reward,
+                episode_running_variance=np.zeros(max_number_of_episodes))
+            plot_episode_stats(stats, display_frequency)
+            
+    def run_reinforce(self, max_number_of_episodes=100, gamma=0.99, interactive = False, display_frequency=1):
+        print('interactive', interactive)
+        # repeat for each episode
+        for episode_number in range(max_number_of_episodes):
+            log_probs = []
+            rewards = []
+            # initialize state
+            state = self.env.reset()
+            
+            done = False # used to indicate terminal state
+            R = 0 # used to display accumulated rewards for an episode
+            t = 0 # used to display accumulated steps for an episode i.e episode length
+            
+            # repeat for each step of episode, until state is terminal
+            while True:
+                
+                t += 1 # increase step counter - for display
+                
+                # choose action from state using policy derived from Q
+#                 print('current epsilon', exploration.epsilon)
+#                 action = self.agent.act(state, exploration.epsilon)
+#                 state_loc = np.ravel_multi_index(state.astype(int), (9,9))
+                state_loc = state.astype(int)
+#                 print('state loc is', state_loc)
+                action, log_prob = self.agent.get_action(state_loc)
+                # take action, observe reward and next state
+                next_state, reward, done, _ = self.env.step(action)
+                # agent learn (Q-Learning update)
+#                 self.agent.learn(state, action, reward, next_state, done)
+                
+                # state <- next state
+                state = next_state
+                
+                R += reward # accumulate reward - for display
+                log_probs.append(log_prob)
+                rewards.append(reward)
+#                 if R > 100:
+#                     done = True
+                
+                # if interactive display, show update for each step
+                if interactive:
+                    self.update_display_step()
+                    
+                if done:
+
+                    returns = []
+
+                    Gt = 0
+                    pw = 0
+
+                    for reward in rewards[::-1]:
+                        Gt += gamma ** pw * reward
+                        pw += 1
+                        returns.append(Gt)
+
+                    returns = returns[::-1]
+                    returns = torch.tensor(returns)
+                    returns = (returns - returns.mean()) / (returns.std() + 1e-9)
+
+                    self.agent.update(returns, log_probs)
+#                     print('Episode: {}, total reward: {}'.format(episode, total_reward_episode[episode]))
+                    break
+            
+            self.episode_length = np.append(self.episode_length,t) # keep episode length - for display
+            self.episode_reward = np.append(self.episode_reward,R) # keep episode reward - for display 
+            
+            # if interactive display, show update for the episode
+            if interactive:
+                self.update_display_episode()
+            
+            # once episode is completed,  # Reduce epsilon (because we need less and less exploration)
+            # also can use counter like : 10, 20, and update the episodes
+#             exploration.update_exploration(episode_number + 1)
         
         # if not interactive display, show graph at the end
         if not interactive:
