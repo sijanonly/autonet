@@ -4,10 +4,10 @@ import torch.nn as nn
 
 
 class Agent(nn.Module):
-    def __init__(self, input_size, hidden_size=64, num_steps=2, device=""):
+    def __init__(self, input_size, hidden_size=64, num_steps=2):
         super(Agent, self).__init__()
 
-        self.DEVICE = device
+        
         self.num_filter_option = 3
         self.filter_size_option = 3
 
@@ -32,7 +32,7 @@ class Agent(nn.Module):
         return outputs
 
     def init_hidden(self):
-        h_t = torch.zeros(1, self.nhid, dtype=torch.float, device=self.DEVICE)
-        c_t = torch.zeros(1, self.nhid, dtype=torch.float, device=self.DEVICE)
+        h_t = torch.zeros(1, self.nhid, dtype=torch.float)
+        c_t = torch.zeros(1, self.nhid, dtype=torch.float)
 
         return (h_t, c_t)

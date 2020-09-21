@@ -1,3 +1,8 @@
+import time
+
+import numpy as np
+import torch
+
 class TrainManager:
     """ A helper class to train, evaluate the model"""
 
@@ -26,7 +31,7 @@ class TrainManager:
 
         return val_loss
 
-    def train(self, train_dataset, val_dataset, batch_size=50, n_epochs=15):
+    def train(self, train_dataset, val_dataset, batch_size=50, n_epochs=1):
         for epoch in range(n_epochs):
             ###################
             # train the model
@@ -36,15 +41,15 @@ class TrainManager:
             # h = self.model.init_hidden(batch_size)
             train_loss = 0
             start_time = time.time()
-            for x_batch, y_batch, batch in generate_batch_data(
+            for x_batch, y_batch, batch in self.generate_batch_data(
                 train_dataset.X, train_dataset.y, batch_size
             ):
                 self.model.reset_hidden_state()
                 outputs = self.model(x_batch)
-                optimizer.zero_grad()
-                tloss = criterion(outputs, y_batch)
+                self.optimizer.zero_grad()
+                tloss = self.criterion(outputs, y_batch)
                 tloss.backward()
-                optimizer.step()
+                self.optimizer.step()
                 train_loss += tloss.item()
             elapsed = time.time() - start_time
             train_loss /= batch
@@ -52,14 +57,16 @@ class TrainManager:
 
             self._validation(val_dataset.X, val_dataset.y, batch_size)
 
+            print('training for {} epoch completed'.format(epoch))
+
     def _validation(self, x_val, y_val, batch_size):
         with torch.no_grad():
             val_loss = 0
-            for x_batch, y_batch, batch in generate_batch_data(
-                self.validation_dataset.X, self.validation_dataset.y, batch_size
+            for x_batch, y_batch, batch in self.generate_batch_data(
+                x_val, y_val, batch_size
             ):
                 outputs = self.model(x_batch)
-                vloss = criterion(outputs, y_batch)
+                vloss = self.criterion(outputs, y_batch)
                 val_loss += vloss.item()
             val_loss /= batch
             self.val_losses.append(val_loss)

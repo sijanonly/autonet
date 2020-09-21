@@ -16,8 +16,8 @@ class PARAMConfig(NamedTuple):
 
 
 class NetworkConfig(NamedTuple):
-    INPUT_SIZE: int
-    HIDDEN_SIZE: int
-    NUM_STEPS: int
-    ACTION_SPACE: int
-    LEARNING_RATE: float
+    input_size: int
+    hidden_size: int
+    num_steps: int
+    action_space: int
+    learning_rate: float

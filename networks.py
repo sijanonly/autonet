@@ -1,8 +1,11 @@
+import numpy as np
+
 import torch
 import torch.nn as nn
 from torch.nn.functional import one_hot, log_softmax, softmax
 from torch.distributions import Categorical
 
+from controller import Agent
 
 class ChildNetwork(nn.Module):
     def __init__(
@@ -57,10 +60,10 @@ class PolicyNetwork:
     )
 
     def __init__(
-        self, input_size, hidden_size, num_steps, action_space, lr=0.001, beta=0.01
+        self, input_size, hidden_size, num_steps, action_space, learning_rate=0.001, beta=0.01
     ):
         self.agent = Agent(input_size, hidden_size, num_steps)
-        self.optimizer = torch.optim.Adam(self.agent.parameters(), lr)
+        self.optimizer = torch.optim.Adam(self.agent.parameters(), learning_rate)
         self.beta = beta
         self.action_space = action_space
 
@@ -83,8 +86,8 @@ class PolicyNetwork:
             current_action_probs : log prob times return(rewards) for a given child network
         """
         self.policy_loss = -1 * torch.mean(current_action_probs)
-        self.probs = softmax(self.logits) + 1e-8
-        self.entropy = -1 * torch.sum(self.probs * log_softmax(self.probs), dim=1)
+        self.probs = softmax(logits, dim=1) + 1e-8
+        self.entropy = -1 * torch.sum(self.probs * log_softmax(self.probs, dim=1), dim=1)
         self.entropy_mean = torch.mean(self.entropy, dim=0)
         self.entropy_bonus = -1 * self.beta * self.entropy_mean
         self.loss = self.policy_loss + self.entropy_bonus
@@ -116,7 +119,7 @@ class PolicyNetwork:
         action_selection_prob = log_softmax(logits, dim=1)
         log_prob = torch.sum(action_mask.float() * action_selection_prob, dim=1)
 
-        action = torch.gather(self.ACTION_SPACE, 1, ind).squeeze(1)
+        action = torch.gather(self.ACTION_SPACE, 1, ind).squeeze(1).numpy()
         print("current action is", action)
         action_dict = {
             "n_hidden": action[0],

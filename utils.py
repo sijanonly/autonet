@@ -1,5 +1,7 @@
+
 from collections import defaultdict
 
+import numpy as np
 
 class ActionSelection:
     action_selection = defaultdict(int)
@@ -48,3 +50,14 @@ def generate_figure(action_dict, title):
     plt.savefig(buf, format="jpeg")
     buf.seek(0)
     return buf
+
+def reward_func(signal):
+    """
+    If signal is below 1(loss<1), the reward will be high.
+    Otherwise, reward will be low.
+    """
+    if signal < 1:
+        reward = -np.log(signal) + 1
+    else:
+        reward = np.exp(-(signal - 1))
+    return reward
