@@ -1,6 +1,9 @@
 
 from collections import defaultdict
 
+import io
+import matplotlib.pyplot as plt
+
 import numpy as np
 
 class ActionSelection:
@@ -39,7 +42,7 @@ class DataLoader:
         return self.X.size(0)
 
 
-def generate_figure(action_dict, title):
+def prepare_plot(action_dict, title):
     """Create a pyplot plot and save to buffer."""
     plt.figure()
     # plt.plot([1, 2])

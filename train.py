@@ -55,8 +55,8 @@ class TrainManager:
             train_loss /= batch
             self.train_losses.append(train_loss)
 
-            self._validation(val_dataset.X, val_dataset.y, batch_size)
-
+            self._validation(val_dataset.X, val_dataset.y, batch_size)  
+       
             print('training for {} epoch completed'.format(epoch))
 
     def _validation(self, x_val, y_val, batch_size):

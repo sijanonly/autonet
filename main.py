@@ -1,11 +1,13 @@
 import time
 import argparse
 
+import PIL
 import numpy as np
 
 import torch
 import torch.optim as optim
 import torchvision
+from torchvision.transforms import ToTensor
 import torchvision.transforms as transforms
 from torch.utils.tensorboard import SummaryWriter
 
@@ -14,7 +16,7 @@ from feature_engine import prepare_train_test, sliding_window, MyDataset, transf
 from config import PARAMConfig, NetworkConfig
 from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
-from utils import ActionSelection, DataLoader, reward_func
+from utils import ActionSelection, DataLoader, reward_func, prepare_plot
 
 N_EPISODE = 2
 
@@ -83,9 +85,26 @@ def main():
         policy_network.update(logit_list, weighted_log_prob_list)
 
         total_rewards.append(reward)
+        
+        #prepare metrics
+        current_action = map(str, action)
+        action_str = "/".join(current_action)
+        ActionSelection.update_selection(action_str)
+        ActionSelection.update_reward(action_str, reward)
+
+
+        #reporting
+        current_action = f"Action selection (Hidden size:{action['n_hidden']}, #layers {action['n_layers']}, drop_prob {action['dropout_prob']})."
+        current_run = "Runs_{}".format(episode + 1) + " " + current_action
+        counter = 0
+        for train_loss, val_loss in zip(train_manager.train_losses, train_manager.val_losses):
+            writer.add_scalars(
+                current_run, {"train_loss": train_loss, "val_loss": val_loss}, counter
+            )
+            counter += 1
 
         writer.add_scalar(
-            tag="Average Return over episodes",
+            tag="Average Return over {} episodes".format(N_EPISODE),
             scalar_value=np.mean(total_rewards),
             global_step=episode,
         )
@@ -96,18 +115,31 @@ def main():
         writer.add_scalar(
             tag="Episode runtime", scalar_value=elapsed, global_step=episode
         )
+ 
+        #
+        # Prepare the plot
+        plot_buf = prepare_plot(ActionSelection.action_selection, "Action Selection")
 
-        current_action = ActionSelection.action_selection
-        for key, value in ActionSelection.action_selection.items():
-            actions = key.split("/")
-            label = "Action n_layers:{0}, n_hiddens :{1}".format(actions[1], actions[0])
-            writer.add_histogram(
-                "Action distribution- {}".format(label), value, episode
-            )
+        image = PIL.Image.open(plot_buf)
+        print("in shape", ToTensor()(image).shape)
+        image = ToTensor()(image)  # .unsqueeze(0)
 
+        writer.add_image("Image 1", image, episode)
+
+        # Prepare the plot
+        plot_buf = prepare_plot(
+            ActionSelection.reward_distribution(), "Reward Distribution"
+        )
+
+        image = PIL.Image.open(plot_buf)
+        print("in shape", ToTensor()(image).shape)
+        image = ToTensor()(image)  # .unsqueeze(0)
+
+        writer.add_image("Image 2", image, episode)
+        
         episode += 1
 
-        writer.close()
+    writer.close()
 
 
 if __name__ == "__main__":
