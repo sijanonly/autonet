@@ -31,7 +31,7 @@ class TrainManager:
 
         return val_loss
 
-    def train(self, train_dataset, val_dataset, batch_size=50, n_epochs=1):
+    def train(self, train_dataset, val_dataset, batch_size=50, n_epochs=50):
         for epoch in range(n_epochs):
             ###################
             # train the model

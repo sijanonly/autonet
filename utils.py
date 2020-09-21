@@ -19,7 +19,7 @@ class ActionSelection:
 
     @classmethod
     def update_reward(cls, key, reward):
-        print("cls.reward_dist", cls.reward_dist, key, reward, cls.reward_dist[key])
+       
         cls.reward_dist[key].append(reward)
 
     @classmethod
@@ -28,7 +28,7 @@ class ActionSelection:
         rewards_dict = defaultdict(float)
         for key, _ in rewards.items():
             rewards_dict[key] = sum(rewards[key]) / float(len(rewards[key]))
-        print("final disttt", rewards_dict)
+        
         return rewards_dict
 
 
@@ -47,6 +47,7 @@ def prepare_plot(action_dict, title):
     plt.figure()
     # plt.plot([1, 2])
     width = 1.0  # gives histogram aspect to the bar diagram
+    print('action dict', action_dict)
     plt.bar(action_dict.keys(), action_dict.values(), width, color=(0.2, 0.4, 0.6, 0.6))
     plt.title(title)
     buf = io.BytesIO()

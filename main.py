@@ -18,7 +18,7 @@ from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
 from utils import ActionSelection, DataLoader, reward_func, prepare_plot
 
-N_EPISODE = 2
+N_EPISODE = 50
 
 class Params:
     NUM_EPOCHS = 5
@@ -59,7 +59,7 @@ def main():
         policy_network = PolicyNetwork.from_dict(dict(network_conf._asdict()))
 
         action, log_prob, logits = policy_network.get_action(initial_state)
-        print('action is', action)
+      
         child_network = ChildNetwork.from_dict(action)
         criterion = torch.nn.MSELoss()
         optimizer = optim.SGD(child_network.parameters(), lr=0.001, momentum=0.9)
@@ -73,7 +73,7 @@ def main():
         elapsed = time.time() - start_time
         signal = train_manager.avg_validation_loss
         reward = reward_func(signal)
-        print("current rewards", reward)
+       
         weighted_log_prob = log_prob * reward
         total_weighted_log_prob = torch.sum(weighted_log_prob).unsqueeze(dim=0)
 
@@ -87,7 +87,7 @@ def main():
         total_rewards.append(reward)
         
         #prepare metrics
-        current_action = map(str, action)
+        current_action = map(str, list(action.values()))
         action_str = "/".join(current_action)
         ActionSelection.update_selection(action_str)
         ActionSelection.update_reward(action_str, reward)
@@ -118,21 +118,21 @@ def main():
  
         #
         # Prepare the plot
-        plot_buf = prepare_plot(ActionSelection.action_selection, "Action Selection")
+        plot_buf = prepare_plot(ActionSelection.action_selection, "Action Selection (n_hidden, n_layers, dropout)")
 
         image = PIL.Image.open(plot_buf)
-        print("in shape", ToTensor()(image).shape)
+
         image = ToTensor()(image)  # .unsqueeze(0)
 
         writer.add_image("Image 1", image, episode)
 
         # Prepare the plot
         plot_buf = prepare_plot(
-            ActionSelection.reward_distribution(), "Reward Distribution"
+            ActionSelection.reward_distribution(), "Reward Distribution per action selection (n_hidden, n_layers, dropout)"
         )
 
         image = PIL.Image.open(plot_buf)
-        print("in shape", ToTensor()(image).shape)
+
         image = ToTensor()(image)  # .unsqueeze(0)
 
         writer.add_image("Image 2", image, episode)
