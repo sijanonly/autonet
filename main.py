@@ -1,5 +1,6 @@
 import time
-import argparse
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from configparser import ConfigParser
 
 import PIL
 import numpy as np
@@ -16,12 +17,12 @@ from feature_engine import prepare_train_test, sliding_window, MyDataset, transf
 from config import PARAMConfig, NetworkConfig
 from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
-from utils import ActionSelection, DataLoader, reward_func, prepare_plot
+from utils import ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot
 
 N_EPISODE = 5
 
 
-def main():
+def main(is_entropy):
     seq_length = 5
     total_rewards = []
     writer = SummaryWriter()
@@ -62,8 +63,8 @@ def main():
         elapsed = time.time() - start_time
         signal = train_manager.avg_validation_loss
         print('signal is', signal)
-        reward = reward_func(signal)
-       
+        reward = reward_func2(signal)
+        print('reward is', reward)      
         weighted_log_prob = log_prob * reward
         total_weighted_log_prob = torch.sum(weighted_log_prob).unsqueeze(dim=0)
 
@@ -72,7 +73,7 @@ def main():
         )
         logit_list = torch.cat((logit_list, logits), dim=0)
         # update the controller network
-        policy_network.update(logit_list, weighted_log_prob_list)
+        policy_network.update(logit_list, weighted_log_prob_list, is_entropy)
 
         total_rewards.append(reward)
         
@@ -99,9 +100,11 @@ def main():
             global_step=episode,
         )
 
-        writer.add_scalar(
-            tag="Entropy over time", scalar_value=policy_network.entropy_mean, global_step=episode
-        )
+
+        if is_entropy:
+            writer.add_scalar(
+                 tag="Entropy over time", scalar_value=policy_network.entropy_mean, global_step=episode
+            )
         writer.add_scalar(
             tag="Episode runtime", scalar_value=elapsed, global_step=episode
         )
@@ -133,4 +136,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = ArgumentParser(
+        description="Training script for autonet",
+        formatter_class=ArgumentDefaultsHelpFormatter,
+    )
+
+    parser.add_argument('--entropy', default=True, action='store_false', help='Enable exploration with entropy?(True by default)')
+
+    args = parser.parse_args()
+    is_entropy_set = args.entropy
+  
+ 
+    main(is_entropy_set)
+

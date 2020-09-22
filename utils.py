@@ -61,7 +61,17 @@ def reward_func(signal):
     Otherwise, reward will be low.
     """
     if signal < 1:
-        reward = -np.log(signal) + 1
+        reward = -np.log(signal) + 5
     else:
         reward = np.exp(-(signal - 1))
+    return reward
+
+def reward_func2(signal):
+    if np.isclose(0, signal):
+        reward = 50
+    elif signal < 1:
+        reward = -np.log(signal) + round(1/(signal*10))
+    else:
+        reward = np.exp(-(signal - 1))
+
     return reward

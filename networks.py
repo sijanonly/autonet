@@ -73,7 +73,7 @@ class PolicyNetwork:
         """
         return self.agent(torch.tensor(s).float())
 
-    def _policy_loss(self, logits, current_action_probs):
+    def _policy_loss(self, logits, current_action_probs, is_entropy=True):
         """
         Entropy will add exploration benefits.
         (more elaboration : https://github.com/dennybritz/reinforcement-learning/issues/34)
@@ -85,19 +85,20 @@ class PolicyNetwork:
             logits : For each child network, we have a new set of logits representing actions
             current_action_probs : log prob times return(rewards) for a given child network
         """
-        self.policy_loss = -1 * torch.mean(current_action_probs)
-        self.probs = softmax(logits, dim=1) + 1e-8
-        self.entropy = -1 * torch.sum(self.probs * log_softmax(self.probs, dim=1), dim=1)
-        self.entropy_mean = torch.mean(self.entropy, dim=0)
-        self.entropy_bonus = -1 * self.beta * self.entropy_mean
-        self.loss = self.policy_loss + self.entropy_bonus
+        self.loss = -1 * torch.mean(current_action_probs)
+        if is_entropy:
+            self.probs = softmax(logits, dim=1) + 1e-8
+            self.entropy = -1 * torch.sum(self.probs * log_softmax(self.probs, dim=1), dim=1)
+            self.entropy_mean = torch.mean(self.entropy, dim=0)
+            self.entropy_bonus = -1 * self.beta * self.entropy_mean
+            self.loss += self.entropy_bonus
 
-    def update(self, logits, log_probs):
+    def update(self, logits, log_probs, is_entropy=True):
         """
         Update the weights of the policy network.
 
         """
-        self._policy_loss(logits, log_probs)
+        self._policy_loss(logits, log_probs, is_entropy)
 
         self.optimizer.zero_grad()
         self.loss.backward()
