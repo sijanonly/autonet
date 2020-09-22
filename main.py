@@ -18,18 +18,7 @@ from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
 from utils import ActionSelection, DataLoader, reward_func, prepare_plot
 
-N_EPISODE = 50
-
-class Params:
-    NUM_EPOCHS = 5
-    ALPHA = 5e-3  # learning rate
-    BATCH_SIZE = 3  #
-    HIDDEN_SIZE = 64  # number of hidden nodes we have in our child network
-    BETA = 0.1  # the entropy bonus multiplier
-    INPUT_SIZE = 3
-    ACTION_SPACE = 3
-    NUM_STEPS = 3  # for 3 params
-    GAMMA = 0.99
+N_EPISODE = 5
 
 
 def main():
@@ -38,7 +27,7 @@ def main():
     writer = SummaryWriter()
 
     network_conf = NetworkConfig(
-        input_size=3, hidden_size=64, num_steps=3, action_space=3, learning_rate=0.001
+        input_size=3, hidden_size=64, num_steps=3, action_space=3, learning_rate=0.005
     )
 
     trainset, valset, testset = prepare_train_test()
@@ -52,11 +41,11 @@ def main():
 
     episode = 0
    
+    policy_network = PolicyNetwork.from_dict(dict(network_conf._asdict()))
     while episode < N_EPISODE:
         initial_state = [[3, 8, 16]]
         logit_list = torch.empty(size=(0, network_conf.action_space))
         weighted_log_prob_list = torch.empty(size=(0,), dtype=torch.float)
-        policy_network = PolicyNetwork.from_dict(dict(network_conf._asdict()))
 
         action, log_prob, logits = policy_network.get_action(initial_state)
       
@@ -72,6 +61,7 @@ def main():
 
         elapsed = time.time() - start_time
         signal = train_manager.avg_validation_loss
+        print('signal is', signal)
         reward = reward_func(signal)
        
         weighted_log_prob = log_prob * reward

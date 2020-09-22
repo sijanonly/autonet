@@ -60,7 +60,7 @@ class PolicyNetwork:
     )
 
     def __init__(
-        self, input_size, hidden_size, num_steps, action_space, learning_rate=0.001, beta=0.01
+        self, input_size, hidden_size, num_steps, action_space, learning_rate=0.001, beta=0.1
     ):
         self.agent = Agent(input_size, hidden_size, num_steps)
         self.optimizer = torch.optim.Adam(self.agent.parameters(), learning_rate)

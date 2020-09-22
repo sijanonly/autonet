@@ -24,14 +24,9 @@ class TrainManager:
     def avg_validation_loss(self):
         val_loss_arr = np.array(self.val_losses)
         val_avg_loss = val_loss_arr.mean()
-        if val_avg_loss < 1:
-            val_loss = -np.log(val_avg_loss) + 1
-        else:
-            val_loss = np.exp(-(val_avg_loss - 1))
+        return val_avg_loss
 
-        return val_loss
-
-    def train(self, train_dataset, val_dataset, batch_size=50, n_epochs=50):
+    def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=5):
         for epoch in range(n_epochs):
             ###################
             # train the model
