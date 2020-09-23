@@ -2,6 +2,7 @@ import time
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from configparser import ConfigParser
 
+import json
 import PIL
 import numpy as np
 
@@ -17,9 +18,9 @@ from feature_engine import prepare_train_test, sliding_window, MyDataset, transf
 from config import PARAMConfig, NetworkConfig
 from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
-from utils import ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot
+from utils import ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot, prepare_figure
 
-N_EPISODE = 5
+N_EPISODE = 100
 
 
 def main(is_entropy):
@@ -82,8 +83,10 @@ def main(is_entropy):
         action_str = "/".join(current_action)
         ActionSelection.update_selection(action_str)
         ActionSelection.update_reward(action_str, reward)
-
-
+        print('current name mapping', ActionSelection.name_mapper)
+        with open('logs/run.log', 'a') as run_file:
+            run_file.write(json.dumps(ActionSelection.name_mapper))
+            run_file.write('\n')
         #reporting
         current_action = f"Action selection (Hidden size:{action['n_hidden']}, #layers {action['n_layers']}, drop_prob {action['dropout_prob']})."
         current_run = "Runs_{}".format(episode + 1) + " " + current_action
@@ -111,25 +114,25 @@ def main(is_entropy):
  
         #
         # Prepare the plot
-        plot_buf = prepare_plot(ActionSelection.action_selection, "Action Selection (n_hidden, n_layers, dropout)")
+        plot_buf = prepare_figure(ActionSelection.action_selection, "Action Selection (n_hidden, n_layers, dropout)")
 
-        image = PIL.Image.open(plot_buf)
+        #image = PIL.Image.open(plot_buf)
 
-        image = ToTensor()(image)  # .unsqueeze(0)
+        #image = ToTensor()(image)  # .unsqueeze(0)
 
-        writer.add_image("Image 1", image, episode)
-
+        #writer.add_image("Image 1", image, episode)
+        writer.add_figure("Image 1", plot_buf, episode)
         # Prepare the plot
-        plot_buf = prepare_plot(
+        plot_buf = prepare_figure(
             ActionSelection.reward_distribution(), "Reward Distribution per action selection (n_hidden, n_layers, dropout)"
         )
 
-        image = PIL.Image.open(plot_buf)
+        #image = PIL.Image.open(plot_buf)
 
-        image = ToTensor()(image)  # .unsqueeze(0)
+        #image = ToTensor()(image)  # .unsqueeze(0)
 
-        writer.add_image("Image 2", image, episode)
-        
+        #writer.add_image("Image 2", image, episode)
+        writer.add_figure("Image 2", plot_buf, episode)
         episode += 1
 
     writer.close()

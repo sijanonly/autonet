@@ -26,7 +26,7 @@ class TrainManager:
         val_avg_loss = val_loss_arr.mean()
         return val_avg_loss
 
-    def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=5):
+    def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=20):
         for epoch in range(n_epochs):
             ###################
             # train the model

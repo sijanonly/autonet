@@ -9,18 +9,24 @@ import numpy as np
 class ActionSelection:
     action_selection = defaultdict(int)
     reward_dist = defaultdict(list)
+    name_mapper = defaultdict(str)
 
     def __init__(self):
         pass
 
     @classmethod
     def update_selection(cls, key):
-        cls.action_selection[key] += 1
+        current_size = len(cls.name_mapper)
+        if key not in cls.name_mapper:
+            name = "N{}".format(current_size+1)
+            cls.name_mapper[key] = name
+        name = cls.name_mapper[key]
+        cls.action_selection[name] += 1
 
     @classmethod
     def update_reward(cls, key, reward):
-       
-        cls.reward_dist[key].append(reward)
+        name = cls.name_mapper[key]
+        cls.reward_dist[name].append(reward)
 
     @classmethod
     def reward_distribution(cls):
@@ -44,16 +50,33 @@ class DataLoader:
 
 def prepare_plot(action_dict, title):
     """Create a pyplot plot and save to buffer."""
-    plt.figure()
+    plt.figure(figsize=(9, 4))
     # plt.plot([1, 2])
-    width = 1.0  # gives histogram aspect to the bar diagram
+    width = 0.1  # gives histogram aspect to the bar diagram
     print('action dict', action_dict)
-    plt.bar(action_dict.keys(), action_dict.values(), width, color=(0.2, 0.4, 0.6, 0.6))
+    plt.bar(action_dict.keys(), action_dict.values(), width,align='edge', color=(0.2, 0.4, 0.6, 0.6))
+    plt.xticks(rotation=10)
     plt.title(title)
     buf = io.BytesIO()
     plt.savefig(buf, format="jpeg")
     buf.seek(0)
     return buf
+
+
+def prepare_figure(action_dict, title):
+    """Create a pyplot plot and save to buffer."""
+    fig = plt.figure(figsize=(9, 3))
+    # plt.plot([1, 2])
+    width = 0.1  # gives histogram aspect to the bar diagram
+    #print('action dict', action_dict)
+    plt.bar(action_dict.keys(), action_dict.values(), width, color=(0.2, 0.4, 0.6, 0.6))
+    #plt.xticks(rotation=10)
+    plt.title(title)
+    #buf = io.BytesIO()
+    #plt.savefig(buf, format="jpeg")
+    #buf.seek(0)
+    return fig
+
 
 def reward_func(signal):
     """
