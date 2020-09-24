@@ -1,10 +1,28 @@
+import os
+import io
 
 from collections import defaultdict
 
-import io
+import numpy as np
 import matplotlib.pyplot as plt
 
-import numpy as np
+import torch
+
+
+def set_seed(seed):
+    # seed for hashing algorithm(e.g order of keys in Dict)
+    os.environ['PYTHONHASHSEED']=str(seed)
+    
+    # fixing seed for numpy pseudo-random generator
+    np.random.seed(seed)
+
+    # fixing seed for pytorch random number generator 
+    torch.manual_seed(seed)
+
+    # enable deterministic CuDNN operations
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    
 
 class ActionSelection:
     action_selection = defaultdict(int)

@@ -18,9 +18,13 @@ from feature_engine import prepare_train_test, sliding_window, MyDataset, transf
 from config import PARAMConfig, NetworkConfig
 from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
-from utils import ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot, prepare_figure
+from utils import set_seed, ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot, prepare_figure
 
 N_EPISODE = 100
+SEED = 0
+
+# Ensuring reproducibility
+set_seed(SEED)
 
 
 def main(is_entropy):
