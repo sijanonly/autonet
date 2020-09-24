@@ -95,3 +95,6 @@ runs/
 
 
 logs/
+
+#config.ini file
+*.ini

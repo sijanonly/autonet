@@ -80,7 +80,13 @@ class PolicyNetwork:
 
         At the beginning, all the actions will have same probability of occurrence.
         After some episodes of learning, few of the choices (actions) might have
-        higher probability of selection, and entropy keeps on decreasing over time.
+        higher probability of selection. Those actions will dominate the selection process.
+        Entropy will add costs to those dominated actions -> allowing algorithm to select new action pairs.
+        Entropy keeps on decreasing over time.
+
+        beta controls the level of regularization. 
+        Too Low beta -> entropy will be insignificant to make policy to go to another direction(explore)
+        Too High beta -> add more randomness, might also give suboptimal policy
         Args:
             logits : For each child network, we have a new set of logits representing actions
             current_action_probs : log prob times return(rewards) for a given child network

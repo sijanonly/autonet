@@ -24,6 +24,14 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
     
 
+class DictObject(dict):
+    """enable dictionary key access as class attribute
+    
+    """
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
 class ActionSelection:
     action_selection = defaultdict(int)
     reward_dist = defaultdict(list)

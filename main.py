@@ -18,7 +18,7 @@ from feature_engine import prepare_train_test, sliding_window, MyDataset, transf
 from config import PARAMConfig, NetworkConfig
 from networks import ChildNetwork, PolicyNetwork
 from train import TrainManager
-from utils import set_seed, ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot, prepare_figure
+from utils import set_seed, ActionSelection, DataLoader, reward_func, reward_func2, prepare_plot, prepare_figure, DictObject
 
 N_EPISODE = 100
 SEED = 0
@@ -27,13 +27,15 @@ SEED = 0
 set_seed(SEED)
 
 
-def main(is_entropy):
+def main(config):
     seq_length = 5
     total_rewards = []
     writer = SummaryWriter()
 
+    is_entropy = config.is_entropy
+
     network_conf = NetworkConfig(
-        input_size=3, hidden_size=64, num_steps=3, action_space=3, learning_rate=0.005
+        input_size=3, hidden_size=64, num_steps=3, action_space=3, learning_rate=0.005, beta=config.beta
     )
 
     trainset, valset, testset = prepare_train_test()
@@ -110,7 +112,7 @@ def main(is_entropy):
 
         if is_entropy:
             writer.add_scalar(
-                 tag="Entropy over time", scalar_value=policy_network.entropy_mean, global_step=episode
+                    tag=f"Entropy over time - BETA:{config.beta}", scalar_value=policy_network.entropy_mean, global_step=episode
             )
         writer.add_scalar(
             tag="Episode runtime", scalar_value=elapsed, global_step=episode
@@ -149,10 +151,20 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--entropy', default=True, action='store_false', help='Enable exploration with entropy?(True by default)')
+    parser.add_argument('--beta', default=0.1, type=float, help='Set beta for entropy')
+    args = vars( parser.parse_args()) # get dictionary
 
-    args = parser.parse_args()
-    is_entropy_set = args.entropy
-  
- 
-    main(is_entropy_set)
+    cfg_parser = ConfigParser()
+    cfg_parser.read("config.ini")
+    
+    default_params = cfg_parser.items('default')
+
+    config = dict(default_params)
+    config.update({k: v for k, v in args.items() if v is not None})
+
+    
+    config_obj = DictObject(config)
+
+
+    main(config_obj)
 
