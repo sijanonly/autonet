@@ -17,40 +17,23 @@ class TrainManager:
     
     def shuffle_on_epoch(self):
         np.random.shuffle(self.indices)
+    
+    @classmethod
+    def generate_batch_data(cls, x, y, batch_size, is_validation=False):
 
-    #@staticmethod
-    #def generate_batch_data_rand(x, y, batch_size):
-    #    """
-    #    On each epoch the data indices will be shuffled and batch data
-    #    based on shuffle will be created
-    #    """
-    #    if not self.indices:
-    #        self.indices = np.arange(x.shape[0])
-    #        print('indices set', self.indices.shape)
+        if cls.indices.size == 0:
+            cls.indices = np.arange(x.shape[0])
 
-    #    for batch, i in enumerate(range(0, len(x) - batch_size, batch_size)):
-    #        inds = self.indices[i : i + batch_size]
-    #        x_batch = x[inds]
-    #        y_batch = y[inds]
-    #        yield x_batch, y_batch, batch
-
-
-    @staticmethod
-    def generate_batch_data(x, y, batch_size):
-        if not self.indices:
-            self.indices = np.arange(x.shape[0])
-            print('indices set', self.indices.shape)
-        print('current index', self.indices[0:10])
-        #for batch, i in enumerate(range(0, len(x) - batch_size, batch_size)):
-        #    x_batch = x[i : i + batch_size]
-        #    y_batch = y[i : i + batch_size]
-        #    yield x_batch, y_batch, batch
         for batch, i in enumerate(range(0, len(x) - batch_size, batch_size)):
-            inds = self.indices[i : i + batch_size]
-            x_batch = x[inds]
-            y_batch = y[inds]
-            yield x_batch, y_batch, batch
-
+            if is_validation:
+                x_batch = x[i : i + batch_size]
+                y_batch = y[i : i + batch_size]
+            else:
+                inds = cls.indices[i : i + batch_size]
+                x_batch = x[inds]
+                y_batch = y[inds]
+            yield x_batch, y_batch, batch  
+            
     @property
     def avg_validation_loss(self):
         val_loss_arr = np.array(self.val_losses)
@@ -58,8 +41,7 @@ class TrainManager:
         return val_avg_loss
 
     def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=20, is_shuffle=False):
-        print('is shuffle at train', is_shuffle)
-        exit(0)
+
         for epoch in range(n_epochs):
             ###################
             # train the model
@@ -93,7 +75,7 @@ class TrainManager:
         with torch.no_grad():
             val_loss = 0
             for x_batch, y_batch, batch in self.generate_batch_data(
-                x_val, y_val, batch_size
+                x_val, y_val, batch_size,is_validation=True
             ):
                 outputs = self.model(x_batch)
                 vloss = self.criterion(outputs, y_batch)

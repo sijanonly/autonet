@@ -68,13 +68,13 @@ def main(config):
             model=child_network, criterion=criterion, optimizer=optimizer
         )
         start_time = time.time()
-        train_manager.train(train_loader, val_loader, is_shuffle)
+        train_manager.train(train_loader, val_loader, is_shuffle=is_shuffle)
 
         elapsed = time.time() - start_time
         signal = train_manager.avg_validation_loss
-        print('signal is', signal)
+
         reward = reward_func2(signal)
-        print('reward is', reward)      
+
         weighted_log_prob = log_prob * reward
         total_weighted_log_prob = torch.sum(weighted_log_prob).unsqueeze(dim=0)
 
