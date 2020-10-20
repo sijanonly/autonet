@@ -21,3 +21,4 @@ class NetworkConfig(NamedTuple):
     num_steps: int
     action_space: int
     learning_rate: float
+    beta: float

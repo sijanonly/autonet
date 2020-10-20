@@ -10,7 +10,7 @@ class Agent(nn.Module):
         
         self.num_filter_option = 3
         self.filter_size_option = 3
-
+        print('data inside', input_size, hidden_size)
         self.lstm1 = nn.LSTMCell(input_size, hidden_size)
         self.decoder = nn.Linear(hidden_size, self.num_filter_option)
         self.num_steps = num_steps

@@ -32,10 +32,11 @@ def main(config):
     total_rewards = []
     writer = SummaryWriter()
 
-    is_entropy = config.is_entropy
-
+    is_entropy = config.entropy
+    is_shuffle = config.shuffle
+    ## TODO : remove config use dict only
     network_conf = NetworkConfig(
-        input_size=3, hidden_size=64, num_steps=3, action_space=3, learning_rate=0.005, beta=config.beta
+        input_size=int(config.input_size), hidden_size=int(config.hidden_size), num_steps=int(config.num_steps), action_space=int(config.action_space), learning_rate=float(config.learning_rate), beta=float(config.beta)
     )
 
     trainset, valset, testset = prepare_train_test()
@@ -50,6 +51,8 @@ def main(config):
     episode = 0
    
     policy_network = PolicyNetwork.from_dict(dict(network_conf._asdict()))
+    print('current policy network', policy_network)
+
     while episode < N_EPISODE:
         initial_state = [[3, 8, 16]]
         logit_list = torch.empty(size=(0, network_conf.action_space))
@@ -65,7 +68,7 @@ def main(config):
             model=child_network, criterion=criterion, optimizer=optimizer
         )
         start_time = time.time()
-        train_manager.train(train_loader, val_loader)
+        train_manager.train(train_loader, val_loader, is_shuffle)
 
         elapsed = time.time() - start_time
         signal = train_manager.avg_validation_loss
@@ -139,6 +142,8 @@ def main(config):
 
         #writer.add_image("Image 2", image, episode)
         writer.add_figure("Image 2", plot_buf, episode)
+
+        print('\n\nEpisode {} completed \n\n'.format(episode+1))
         episode += 1
 
     writer.close()
@@ -150,7 +155,8 @@ if __name__ == "__main__":
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument('--entropy', default=True, action='store_false', help='Enable exploration with entropy?(True by default)')
+    parser.add_argument('--entropy', default=False, action='store_true', help='Enable exploration with entropy?(False by default)')
+    parser.add_argument('--shuffle', default=False, action='store_true', help='Enable random shuffle on each epoch?(False by default)')
     parser.add_argument('--beta', default=0.1, type=float, help='Set beta for entropy')
     args = vars( parser.parse_args()) # get dictionary
 
@@ -161,8 +167,8 @@ if __name__ == "__main__":
 
     config = dict(default_params)
     config.update({k: v for k, v in args.items() if v is not None})
-
-    
+    print('current config', config)
+    #exit(0)
     config_obj = DictObject(config)
 
 

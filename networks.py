@@ -1,3 +1,5 @@
+import pprint
+
 import numpy as np
 
 import torch
@@ -67,6 +69,11 @@ class PolicyNetwork:
         self.beta = beta
         self.action_space = action_space
 
+    
+    def __str__(self):
+        obj_dict = vars(self)
+        return pprint.pformat(obj_dict, indent=4)
+    
     def _predict(self, s):
         """
         Compute the action probabilities of state s using the learning model
