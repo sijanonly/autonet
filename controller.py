@@ -20,13 +20,14 @@ class Agent(nn.Module):
     def forward(self, input1):
         outputs = []
         h_t, c_t = self.hidden
-
+        print('num setps', self.num_steps)
         for i in range(self.num_steps):
             h_t, c_t = self.lstm1(input1, (h_t, c_t))
             output = self.decoder(h_t)
             input1 = output
+            print('output inside loop', output)
             outputs += [output]
-
+        print('outputs is', outputs)
         outputs = torch.stack(outputs).squeeze(1)
 
         return outputs

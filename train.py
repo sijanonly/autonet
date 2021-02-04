@@ -5,7 +5,7 @@ import torch
 
 class TrainManager:
     """ A helper class to train, evaluate the model"""
-
+    indices = np.array([])
     def __init__(self, model, criterion, optimizer):
         self.model = model
         self.criterion = criterion
@@ -40,7 +40,7 @@ class TrainManager:
         val_avg_loss = val_loss_arr.mean()
         return val_avg_loss
 
-    def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=20, is_shuffle=False):
+    def train(self, train_dataset, val_dataset, batch_size=10, n_epochs=2, is_shuffle=False):
 
         for epoch in range(n_epochs):
             ###################

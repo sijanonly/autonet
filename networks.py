@@ -58,7 +58,7 @@ class ChildNetwork(nn.Module):
 class PolicyNetwork:
     # hidden size, number of layers, dropout_probs
     ACTION_SPACE = torch.tensor(
-        [[10, 50, 100, 150], [1, 2, 3, 4], [0.2, 0.4, 0.5, 0.7]]
+        [[1, 2, 3, 4],[10, 50, 100, 150], [0.2, 0.4, 0.5, 0.7]]
     )
 
     def __init__(
@@ -134,12 +134,19 @@ class PolicyNetwork:
         log_prob = torch.sum(action_mask.float() * action_selection_prob, dim=1)
 
         action = torch.gather(self.ACTION_SPACE, 1, ind).squeeze(1).numpy()
+        
+        print('logits', logits)
+        print('ind', ind)
+        print('mask', action_mask)
+        print('action selection prob', action_selection_prob)
+        print('current log prob', log_prob)
         print("current action is", action)
         action_dict = {
             "n_hidden": action[0],
             "n_layers": action[1],
             "dropout_prob": action[2],
         }
+        print('selected action', action_dict)
         return action_dict, log_prob, logits
 
     @classmethod
