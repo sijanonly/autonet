@@ -7,7 +7,7 @@ joblib==0.16.0
 kiwisolver==1.2.0
 Markdown==3.2.2
 matplotlib==3.3.0
-numpy==1.18.1
+numpy==1.22.0
 pandas==1.0.5
 Pillow==6.2.2
 protobuf==3.12.2
