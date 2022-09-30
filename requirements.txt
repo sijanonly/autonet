@@ -3,7 +3,7 @@ captum==0.2.0
 cycler==0.10.0
 grpcio==1.30.0
 importlib-metadata==1.7.0
-joblib==0.16.0
+joblib==1.2.0
 kiwisolver==1.2.0
 Markdown==3.2.2
 matplotlib==3.3.0
